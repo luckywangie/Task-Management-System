@@ -47,14 +47,52 @@ def view_task(task_id):
     else:
         print("\n❌ Task not found.")
 
-def update_task(task_id, status):
-    """Update task completion status."""
+def edit_task(task_id):
+    """Edit task details (title, description, due date)."""
     conn = connect_db()
     cursor = conn.cursor()
-    cursor.execute("UPDATE tasks SET completed = ? WHERE id = ?", (status, task_id))
+    
+    # Fetch existing task
+    cursor.execute("SELECT title, description, due_date FROM tasks WHERE id = ?", (task_id,))
+    task = cursor.fetchone()
+
+    if not task:
+        print("\n❌ Task not found.")
+        conn.close()
+        return
+
+    print("\n✏️ Editing Task Details (Press Enter to keep existing values)")
+    
+    new_title = input(f"📌 New Title [{task[0]}]: ").strip() or task[0]
+    new_description = input(f"📝 New Description [{task[1]}]: ").strip() or task[1]
+    new_due_date = input(f"📅 New Due Date (YYYY-MM-DD) [{task[2]}]: ").strip() or task[2]
+
+    cursor.execute("UPDATE tasks SET title = ?, description = ?, due_date = ? WHERE id = ?", 
+                   (new_title, new_description, new_due_date, task_id))
     conn.commit()
     conn.close()
-    print("\n✏️ Task updated successfully!")
+    
+    print("\n✅ Task details updated successfully!")
+
+def update_task(task_id):
+    """Update task completion status or edit details."""
+    print("\n🔄 What would you like to update?")
+    print("1️⃣  Edit Task Details (Title, Description, Due Date)")
+    print("2️⃣  Mark as Completed/Pending")
+    choice = input("\n👉 Choose an option: ").strip()
+
+    if choice == "1":
+        edit_task(task_id)
+    elif choice == "2":
+        conn = connect_db()
+        cursor = conn.cursor()
+        status = input("✔️ Mark as completed? (yes/no): ").strip().lower() == "yes"
+        cursor.execute("UPDATE tasks SET completed = ? WHERE id = ?", (status, task_id))
+        conn.commit()
+        conn.close()
+        print("\n✅ Task status updated successfully!")
+    else:
+        print("\n❌ Invalid choice. Please try again.")
 
 def delete_task(task_id):
     """Delete a task from the database."""
@@ -88,7 +126,7 @@ def show_menu():
     print("1️⃣  List Tasks")
     print("2️⃣  Add Task")
     print("3️⃣  View Task Details")
-    print("4️⃣  Update Task Status")
+    print("4️⃣  Update Task (Edit or Change Status)")
     print("5️⃣  Delete Task")
     print("6️⃣  Filter Tasks by Status")
     print("7️⃣  Exit")
@@ -110,8 +148,7 @@ def main():
             view_task(task_id)
         elif choice == "4":
             task_id = input("\n🔄 Enter Task ID to update: ").strip()
-            status = input("✔️ Mark as completed? (yes/no): ").strip().lower() == "yes"
-            update_task(task_id, status)
+            update_task(task_id)
         elif choice == "5":
             task_id = input("\n🗑 Enter Task ID to delete: ").strip()
             delete_task(task_id)
