@@ -81,3 +81,22 @@ def delete(task_id):
     else:
         print(f"Task with ID {task_id} not found.")
     session.close()
+
+#Filtering by task status
+@cli.command()
+@click.option('--status', type=click.Choice(['completed', 'pending']), help="Filter tasks by status")
+def filter(status):
+    """Filter tasks by status (completed or pending)"""
+    session = SessionLocal()
+    if status == "completed":
+        tasks = session.query(Task).filter_by(completed=True).all()
+    else:
+        tasks = session.query(Task).filter_by(completed=False).all()
+
+    if not tasks:
+        print(f"No {status} tasks found.")
+    else:
+        for task in tasks:
+            print(f"{task.id}. {task.title} (Due: {task.due_date})")
+    session.close()
+
