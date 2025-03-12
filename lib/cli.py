@@ -51,4 +51,19 @@ def view(task_id):
         print(f"Task with ID {task_id} not found.")
     session.close()
 
+#Update task status
+@cli.command()
+@click.argument('task_id', type=int)
+@click.option('--completed', type=bool, default=True, help="Mark task as completed (True/False)")
+def update(task_id, completed):
+    """Update a task's status"""
+    session = SessionLocal()
+    task = session.query(Task).filter_by(id=task_id).first()
+    if task:
+        task.completed = completed
+        session.commit()
+        print(f"Task '{task.title}' updated to {'Completed' if completed else 'Pending'}.")
+    else:
+        print(f"Task with ID {task_id} not found.")
+    session.close()
 
