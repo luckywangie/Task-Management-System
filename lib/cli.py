@@ -8,7 +8,7 @@ def cli():
 
 if __name__ == "__main__":
     cli()
-    
+
 #Add a new task 
 @cli.command()
 @click.option('--title', prompt="Task Title", help="The title of the task")
@@ -22,3 +22,18 @@ def add(title, description, due_date):
     session.commit()
     session.close()
     print(f"✅ Task '{title}' added successfully!")
+
+#List all tasks
+@cli.command()
+def list():
+    """List all tasks"""
+    session = SessionLocal()
+    tasks = session.query(Task).all()
+    if not tasks:
+        print("No tasks found.")
+    else:
+        for task in tasks:
+            status = "✅ Completed" if task.completed else "❌ Pending"
+            print(f"{task.id}. {task.title} - {status} (Due: {task.due_date})")
+    session.close()
+
