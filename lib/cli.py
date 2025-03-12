@@ -67,3 +67,17 @@ def update(task_id, completed):
         print(f"Task with ID {task_id} not found.")
     session.close()
 
+#Delete a task
+@cli.command()
+@click.argument('task_id', type=int)
+def delete(task_id):
+    """Delete a task"""
+    session = SessionLocal()
+    task = session.query(Task).filter_by(id=task_id).first()
+    if task:
+        session.delete(task)
+        session.commit()
+        print(f"Task '{task.title}' deleted successfully!")
+    else:
+        print(f"Task with ID {task_id} not found.")
+    session.close()
