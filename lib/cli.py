@@ -37,3 +37,18 @@ def list():
             print(f"{task.id}. {task.title} - {status} (Due: {task.due_date})")
     session.close()
 
+#View a task
+@cli.command()
+@click.argument('task_id', type=int)
+def view(task_id):
+    """View details of a task"""
+    session = SessionLocal()
+    task = session.query(Task).filter_by(id=task_id).first()
+    if task:
+        status = "✅ Completed" if task.completed else "❌ Pending"
+        print(f"Title: {task.title}\nDescription: {task.description}\nDue Date: {task.due_date}\nStatus: {status}")
+    else:
+        print(f"Task with ID {task_id} not found.")
+    session.close()
+
+
